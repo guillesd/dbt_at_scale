@@ -1,0 +1,29 @@
+version: 2
+
+sources:
+  - name: src_google_trends
+    tables:
+      - name: international_top_rising_terms
+        description: Top rising terms in Google
+        loaded_at_field: "CAST(refresh_date AS TIMESTAMP)"
+        freshness:
+          warn_after: {count: 2, period: day}
+          error_after: {count: 3, period: day}
+        tests:
+          - unique:
+              column_name: "CONCAT(region_code, '_', term, '_', week)"
+              config:
+                where: "refresh_date = DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)"
+
+      - name: international_top_terms
+        description: Top established terms in Google
+        loaded_at_field: "CAST(refresh_date AS TIMESTAMP)"
+        freshness:
+          warn_after: {count: 2, period: day}
+          error_after: {count: 3, period: day}
+        tests:
+          - unique:
+              column_name: "CONCAT(region_code, '_', term, '_', week)"
+              config:
+                where: "refresh_date = DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)"
+            
