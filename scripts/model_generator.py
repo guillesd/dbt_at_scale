@@ -1,8 +1,17 @@
 import csv 
 from typing import Generator
 import os
+import logging
 
-def read_csv() -> Generator[str, None, None]:
+LOG_FORMAT = "%(asctime)s %(levelname)s: %(message)s"
+DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+logging.basicConfig(
+    level=logging.INFO,
+    format=LOG_FORMAT,
+    datefmt=DATE_FORMAT,
+)
+
+def read_countries_csv() -> Generator[str, None, None]:
     with open("./scripts/inputs/countries.csv", "r") as file:
         lines = csv.reader(file)
         next(lines)
@@ -30,7 +39,8 @@ def render_template(country: str, dataset: str, table: str) -> str:
     return config + macro
 
 def main(dataset: str, table: str) -> None:
-    for country in read_csv():
+    for country in read_countries_csv():
+        logging.info(f"Creating model from table {table} for country {country}")
         rendered_template = render_template(country, dataset, table)
 
         directory = f"./models/staging/staging_{table}"
