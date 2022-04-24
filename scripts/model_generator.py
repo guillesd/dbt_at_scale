@@ -18,7 +18,7 @@ def read_countries_csv() -> Generator[str, None, None]:
         for line in lines:
             yield line[0]
 
-def render_template(country: str, dataset: str, table: str) -> str:
+def render_staging_models(country: str, dataset: str, table: str) -> str:
     config = """
     {{ 
         config(
@@ -34,22 +34,47 @@ def render_template(country: str, dataset: str, table: str) -> str:
     """
     macro = (
         "{{ "
-        f"country_filtered_view('{dataset}', '{table}', '{country}')" 
+        f"country_filtered_incremental('{dataset}', '{table}', '{country}')" 
         " }}"
     )
     return config + macro
 
-def main(dataset: str, table: str) -> None:
-    for country in read_countries_csv():
-        logging.info(f"Creating model from table {table} for country {country}")
-        rendered_template = render_template(country, dataset, table)
+def render_mart_models(table: str) -> str:
+    config = """
+    {{ 
+        config(
+            schema = 'mart_latest_week',
+            materialized = 'view',
+        ) 
+    }}
+    """
+    macro = (
+        "{{ "
+        f"latest_week_view('{table}')" 
+        " }}"
+    )
+    return config + macro
 
-        directory = f"./models/staging/staging_{table}"
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        with open(f"{directory}/stg_{table}_{country}.sql", "w") as out_file:
-            out_file.write(rendered_template)
+def create_models(dataset: str, table: str) -> None:
+    for country in read_countries_csv():
+        logging.info(f"Creating staging model from table {table} for country {country}")
+        rendered_staging = render_staging_models(country, dataset, table)
+
+        staging_directory = f"./models/staging/staging_{table}"
+        if not os.path.exists(staging_directory):
+            os.makedirs(staging_directory)
+        with open(f"{staging_directory}/stg_{table}_{country}.sql", "w") as out_file:
+            out_file.write(rendered_staging)
+
+        logging.info(f"Creating marts latest week view model from table {table} for country {country}")
+        rendered_mart= render_mart_models(f"stg_{table}_{country}")
+
+        marts_directory = f"./models/marts/latest_week_views"
+        if not os.path.exists(marts_directory):
+            os.makedirs(marts_directory)
+        with open(f"{marts_directory}/latest_week_{table}_{country}.sql", "w") as out_file:
+            out_file.write(rendered_mart)
 
 if __name__=="__main__":
     for table in ["international_top_rising_terms", "international_top_terms"]:
-        main(dataset="src_google_trends", table=table)
+        create_models(dataset="src_google_trends", table=table)

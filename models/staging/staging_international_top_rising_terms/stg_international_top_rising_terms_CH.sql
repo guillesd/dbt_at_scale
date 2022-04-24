@@ -10,4 +10,4 @@
             incremental_strategy = 'insert_overwrite'
         ) 
     }}
-    {{ country_filtered_view('src_google_trends', 'international_top_rising_terms', 'CH') }}
+    {{ country_filtered_incremental('src_google_trends', 'international_top_rising_terms', 'CH') }}
