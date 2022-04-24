@@ -1,6 +1,7 @@
 
     {{ 
         config(
+            schema = 'staging'
             materialized = 'incremental',
             partition_by = {
                 'field': 'refresh_date',

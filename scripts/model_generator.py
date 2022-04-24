@@ -22,6 +22,7 @@ def render_template(country: str, dataset: str, table: str) -> str:
     config = """
     {{ 
         config(
+            schema = 'staging'
             materialized = 'incremental',
             partition_by = {
                 'field': 'refresh_date',
