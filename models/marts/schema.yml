@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: latest_week_international_top_rising_terms_AR
+    description: View containing latest international top rising terms for Argentina
+    columns:
+      - name: term
+        description: Trendy term for a specific week
+      - name: country_code
+        description: Country code ISO compliant
+        tests:
+          - accepted_values:
+              values: ['AR']

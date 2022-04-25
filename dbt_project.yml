@@ -22,7 +22,6 @@ snapshot-paths: ["snapshots"]
 target-path: "target"  # directory which will store compiled SQL files
 clean-targets:         # directories to be removed by `dbt clean`
   - "target"
-  - "dbt_packages"
 
 
 # Configuring models
@@ -36,3 +35,5 @@ models:
     # Config indicated by + and applies to all files under models/example/
     example:
       +materialized: view
+
+on-run-end: "{{ grant_dataset_role('guille_dev_mart_last_week', 'user:timouelen@godatadriven.com') }}"
